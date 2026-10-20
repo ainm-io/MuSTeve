@@ -570,7 +570,7 @@ contains
                enddo
              enddo
            enddo
-        !$OMP END TARGET TEAMS DISTRIBUTE PARALLEL DO
+        !$OMP END TARGET TEAMS DISTRIBUTE PARALLEL DO SIMD
          enddo
        else
          do L4 = 1, kkrsz
