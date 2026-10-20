@@ -560,7 +560,9 @@ contains
 !  ===================================================================
    na_l = na; ld_l = ld_rint
 !  -------------------------------------------------------------------
+#ifdef ACCEL   
    call ppbp_begin_atoms_gpu(na_l, lmax_a, nnr_a, jmax_a, r_interp_a, ld_l)
+#endif
 !  -------------------------------------------------------------------
 !
 !  ===================================================================
@@ -589,7 +591,9 @@ contains
 !
       nk_l = nk; km_l = kmax_l; kt_l = KT
 !     ----------------------------------------------------------------
+#ifdef ACCEL
       call ppbp_push_tile_gpu(kvec_h, fftc_h, ylm_h, nk_l, km_l, kt_l)
+#endif
 !     ----------------------------------------------------------------
 !
       do io = 1, na
@@ -603,7 +607,9 @@ contains
 !        The shim synchronizes its private stream before returning, so
 !        this range reports device time rather than launch time.
 !        -------------------------------------------------------------
+#ifdef ACCEL
          call ppbp_process_atom_gpu(ia_l, pos_l, nk_l, kp_l, ib_l)
+#endif
 !        -------------------------------------------------------------
       enddo
 !
@@ -619,7 +625,9 @@ contains
    do ia = 1, na
       ia_l = ia
 !     ----------------------------------------------------------------
+#ifdef ACCEL
       call ppbp_finalize_atom_gpu(ia_l, dmy_l, w_out(1,ia))
+#endif
 !     ----------------------------------------------------------------
    enddo
 !  -------------------------------------------------------------------
