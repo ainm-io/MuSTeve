@@ -1,0 +1,91 @@
+#---------------------------------------------------------------------
+# MuST Makefile - Arch Linux (OpenMPI + GNU compilers)
+# Notes:
+#  - Required Arch packages: 
+#      openmpi, gcc, gcc-fortran, openblas, lapack, 
+#  - External pacakges - included in repo, specify path if built seperately:
+#      fftw, hdf5-openmpi, libxc, p3dfft
+#---------------------------------------------------------------------
+
+#=====================================================================
+# Acceleration = 1: enable GPU acceleration
+# Acceleration = 0: otherwise
+#=====================================================================
+Acceleration = 0
+
+#=====================================================================
+# Library paths and elements
+#=====================================================================
+HDF5_PATH   =
+ACCEL       =
+ACCEL_PATH  =
+LIBXC_PATH  =
+FFTW_PATH   =
+P3DFFT_PATH =
+LUA_PATH    =
+MATH_PATH   =
+
+# Default math libs: prefer OpenBLAS if present. If you want system BLAS/LAPACK
+# leave MATH_PATH empty and ensure you have -lopenblas and -llapack available.
+ifeq ($(MATH_PATH),)
+  MATH_LIBS = -lopenblas -llapack -lscalapack 
+else
+  MATH_LIBS = -L$(MATH_PATH) -lblas -llapack -lscalapack 
+endif
+
+LIBS       += $(MATH_LIBS)
+
+#=====================================================================
+# Compiler tools - use OpenMPI wrappers (arch packages provide mpicc, mpicxx, mpifort)
+#=====================================================================
+CC          = mpicc
+CXX         = mpicxx
+F77         = mpifort
+FC          = mpifort
+MPICC       = mpicc
+ACCEL_CXX   =
+ARCHV       =
+
+#=====================================================================
+# Preprocessor/Compiler/Linker flags
+# - Use -fopenmp for OpenMP with GCC/gfortran
+# - Keep -fpp for gfortran preprocessor
+#=====================================================================
+# For gfortran preprocessor
+FPPDEFS     = -cpp
+# For C/C++ preprocessor
+CPPDEFS     = -cpp
+
+# Enable MPI and Scalapack; 
+FPPFLAGS    = -DMPI -DMaxOutProcs=1 -DUSE_SCALAPACK
+
+# Compiler optimization flags - adjust if you prefer different tuning
+CFLAGS      = -O3 -march=native -std=gnu17 -Wno-unknown-pragmas
+CXXFLAGS    = -O3 -std=c++14 -march=native -Wno-unknown-pragmas
+FFLAGS      = -O3 -I. -march=native -fallow-argument-mismatch
+# OpenMP flag for GCC and friends
+OPT_OPENMP  = -fopenmp  
+
+# Add OpenMP flag into the compiler flags where appropriate
+CFLAGS      := $(CFLAGS) $(OPT_OPENMP)
+CXXFLAGS    := $(CXXFLAGS) $(OPT_OPENMP)
+FFLAGS      := $(FFLAGS) $(OPT_OPENMP)
+
+# Linker
+LD_FLAGS    = $(OPT_OPENMP)
+LD          = $(FC) $(LD_FLAGS)
+
+#=====================================================================
+# Configure flags for external packages 
+# Adjust these lines if you use system packages.
+#=====================================================================
+HDF5_CONFIG_FLAGS   = --enable-fortran --enable-parallel --prefix=$(HDF5_PATH) CC=$(CC) CXX=$(CXX) FC=$(FC)
+LIBXC_CONFIG_FLAGS  = CC=$(CC) CFLAGS="$(CFLAGS)" FC=$(FC) FFLAGS="$(FFLAGS)" --prefix=$(LIBXC_PATH)
+
+P3DFFT_CONFIG_FLAGS = --enable-openmpi CC=$(CC) FC=$(FC) \
+  FCFLAGS="-O3 -fallow-argument-mismatch -cpp -DUSE_MPI -DMPICH_SKIP_MPICXX -DOMPI_SKIP_MPICXX" \
+  --prefix=$(P3DFFT_PATH)
+
+FFTW_CONFIG_FLAGS   = --enable-mpi --enable-openmp --enable-threads CC=$(CC) CFLAGS="$(CFLAGS)" MPICC=$(MPICC) F77=$(F77) FFLAGS="$(FFLAGS)" --prefix=$(FFTW_PATH)
+
+#---------------------------------------------------------------------
