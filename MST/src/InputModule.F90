@@ -50,7 +50,8 @@ public :: initInput,         &
           isIndexValueForm,  &
           isLabelValueForm,  &
           getKeyLabelValue,  &
-          getKeyLabelIndexValue
+          getKeyLabelIndexValue, &
+          getInputFilePath
 !
    interface getKeyValue
       module procedure getKeyValue_str0, getKeyValue_str1, &
@@ -112,23 +113,42 @@ contains
    use StringModule, only : initString
 !
    implicit none
+   character (len=160) :: arg_val
+   integer (kind=IntKind) :: nargs
 !
    NumInputTables = 0
-!  DataTable%UnitNumber = -1
-!  DataTable%Open = .false.
 !
-!  -------------------------------------------------------------------
    call initDefaultParam()
    call initCmdLineOption(num_args)
    call initString(80)
-!  -------------------------------------------------------------------
-!  print *,'Number of command line arguments = ',num_args
+!
+   ! 1. Read the input file name from the command line (Rank 0)
+   if (MyPE == InputPE) then
+      nargs = command_argument_count()
+      if (nargs >= 1) then
+         call get_command_argument(1, arg_val)
+         file_path = trim(arg_val)
+      else
+         file_path = StandardInputFile  ! Fallback default filename
+      end if
+   end if
+!
+   ! 2. Broadcast the file path to all other MPI ranks so everyone is synchronized
+   call bcastMessage(file_path, InputPE)
 !
    Initialized = .true.
 !
    end subroutine initInput
 !  ===================================================================
 !
+   function getInputFilePath() result(path)
+      implicit none
+      character (len=200) :: path
+      path = file_path
+   end function getInputFilePath
+
+
+
 !  *******************************************************************
 !
 !  ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc

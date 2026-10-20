@@ -4,7 +4,7 @@ Module PublicParamDefinitionsModule
 public :: checkParameter,  &
           getParameterInfo
 !
-   character (len=12) :: StandardInputFile= 'i_mst_stdin'
+   character (len=200) :: StandardInputFile= 'i_mst_stdin'
    integer (kind=IntKind), parameter :: MaxLenFileName = 100
 !
 !  ===================================================================

@@ -32,6 +32,7 @@ program mst2
    use InputModule, only : initInput, endInput, readInputData
    use InputModule, only : openInputFile, closeInputFile
    use InputModule, only : getKeyValue, printKeyNames, getTableIndex
+   use InputModule, only : getInputFilePath
 !
    use XMLDataModule, only : initXMLData, endXMLData
 !
@@ -474,22 +475,9 @@ program mst2
 !  -------------------------------------------------------------------
    call initInput()
 !  -------------------------------------------------------------------
-!  FileName = 'None'
-!  inquire(unit=5,name=FileName,named=FileNamed)
-   inquire(unit=5,name=FileName,exist=StandardInputExist)
-!  write(6,*) "main:: Input file open: ",trim(FileName)
-!  *******************************************************************
-!  if (FileNamed) then
-   if (StandardInputExist) then
-!     ----------------------------------------------------------------
-      call readInputData(5,def_id)
-!     ----------------------------------------------------------------
-   else ! The standard input can be taken from a file named as StandardInputFile
-!     ----------------------------------------------------------------
-      call openInputFile(7,StandardInputFile)
-      call readInputData(7,def_id)
-!     ----------------------------------------------------------------
-   endif
+!  Open and read the input file dynamically using unit 7
+   call openInputFile(7, trim(getInputFilePath()))
+   call readInputData(7, def_id)
 !
 !  ===================================================================
 !  Check if we are performing a self interaction corrected calculation
