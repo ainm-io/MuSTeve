@@ -84,3 +84,7 @@
    n = n + 1; Options(1,n)='-cz';  Options(2,n)='--contour-zone'; Options(3,n)='--contour_zone'
               OptionKeys(n)='Energy Contour Zone Parameters'
               OptionValues(n) = '0.000,0.010'
+!
+   n = n + 1; Options(1,n)='-i';   Options(2,n)='--input-file'; Options(3,n)='--input_file'
+              OptionKeys(n)='Input File'
+              OptionValues(n) = 'i_mst_stdin'

@@ -109,12 +109,13 @@ contains
    subroutine initInput()
 !  ===================================================================
    use DefaultParamModule, only : initDefaultParam
-   use CmdLineOptionModule, only : initCmdLineOption
+   use CmdLineOptionModule, only : initCmdLineOption, getCmdLineOptionValue
    use StringModule, only : initString
+   use PublicParamDefinitionsModule, only : StandardInputFile
 !
    implicit none
-   character (len=160) :: arg_val
-   integer (kind=IntKind) :: nargs
+   character (len=200) :: arg_val
+   integer (kind=IntKind) :: status
 !
    NumInputTables = 0
 !
@@ -124,9 +125,8 @@ contains
 !
    ! 1. Read the input file name from the command line (Rank 0)
    if (MyPE == InputPE) then
-      nargs = command_argument_count()
-      if (nargs >= 1) then
-         call get_command_argument(1, arg_val)
+      status = getCmdLineOptionValue('Input File', arg_val)
+      if (status == 0 .and. len_trim(arg_val) > 0) then
          file_path = trim(arg_val)
       else
          file_path = StandardInputFile  ! Fallback default filename
